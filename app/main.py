@@ -4,15 +4,16 @@ sys.path.append('../') # To import local modules of the project
 
 import sounddevice as sd
 import numpy as np
+import silero_vad
 
 from collections import Counter
 from config import Config
 from processing import get_features, preprocess
 
 
-model_path = '../models/emvoia.keras'
-labels = {0: 'angry', 1: 'calm', 2: 'disgust', 3: 'fearful',
-          4: 'happy', 5: 'neutral', 6: 'sad', 7: 'surprised'}
+model_path = '../models/emvoia-2024-12-18-18:54:20.271631.keras'
+labels = {0: 'angry', 1: 'happy', 2: 'neutral', 3: 'sad',
+          4: 'surprise'}
 
 counter = Counter()
 average_over_counter = 0
@@ -34,7 +35,6 @@ def count_label(label):
 
 if __name__ == '__main__':
     cfg = Config() # Using the defaults
-
     if not os.path.isfile(model_path):
         print('Model not found')
         exit(-1)
@@ -45,12 +45,13 @@ if __name__ == '__main__':
 
     stream.start()
     while True:
-        indata, overflowed = stream.read(cfg.input_size*2)
+        indata, overflowed = stream.read(cfg.input_size)
         rec_preprocessed = preprocess(np.array(indata.T.tolist()[0]), cfg)
         if rec_preprocessed is not None:
-            prediction = labels[np.argmax(model.predict(get_features(np.expand_dims(rec_preprocessed[:cfg.input_size], axis=0), cfg), verbose=0))]
+            prediction_data = np.expand_dims(np.swapaxes(get_features(rec_preprocessed, cfg), 0, 1), 0)
+            prediction = labels[np.argmax(model.predict(prediction_data, verbose=0))]
             count_label(prediction)
-            # stream.write(rec_preprocessed[:cfg.input_size].astype('float32'))
+            #stream.write(rec_preprocessed[:cfg.input_size].astype('float32'))
         else:
             to_clear_counter += 1
             if to_clear_counter == EMPTY_TO_CLEAR:
