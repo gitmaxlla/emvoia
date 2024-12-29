@@ -11,13 +11,16 @@ from config import Config
 from processing import get_features, preprocess
 
 
-model_path = '../models/emvoia-2024-12-18-18:54:20.271631.keras'
-labels = {0: 'angry', 1: 'happy', 2: 'neutral', 3: 'sad',
-          4: 'surprise'}
+model_path = '../models/emvoia-2024-12-27-13:05:25.296732.keras'
+
+labels = {0: 'happy', 1: 'sad'}
+
+#labels = {0: 'angry', 1: 'happy', 2: 'neutral', 3: 'sad',
+#          4: 'surprise'}
 
 counter = Counter()
 average_over_counter = 0
-AVERAGE_OVER = 3
+AVERAGE_OVER = 1
 
 EMPTY_TO_CLEAR = 3
 to_clear_counter = 0
